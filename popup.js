@@ -58,7 +58,6 @@ function getFolders()   {
             request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
         },
         success: function(data) {
-            console.log(data);
             $.each(data.data, function() {
                 if(this.title != "Root") {
                     folders[this.id] = this;
@@ -120,8 +119,35 @@ function getColors() {
     });
 }
 function sortItems(a, b) {
-    wfA = workFlows[a.customStatusId];
-    wfB = workFlows[b.customStatusId];
+    var wfA = workFlows[a.customStatusId],
+        wfB = workFlows[b.customStatusId];
+    
+    if (!folders[a.parentIds[0]]) {
+        if(a.superParentIds.length > 0) {
+            folderA = folders[a.superParentIds[0]].title;
+        }
+        else {
+            //Root folder goes first
+            folderA = "0000AAAAA-Root";
+        }
+    }
+    else {
+        folderA = folders[a.parentIds[0]].title;
+    }
+
+    if (!folders[b.parentIds[0]]) {
+        if(b.superParentIds.length > 0) {
+            folderB = folders[b.superParentIds[0]].title;
+        }
+        else {
+            //Root folder goes first
+            folderB = "0000AAAAA-Root";
+        }
+    }
+    else {
+        folderB = folders[b.parentIds[0]].title;
+    }
+
     if (wfA.order == wfB.order) {
         if (wfA.name < wfB.name) {
             return -1;
@@ -129,10 +155,10 @@ function sortItems(a, b) {
         else if(wfA.name > wfB.name) {
             return 1;
         }
-        else if (folders[this] && folders[a.parentIds[0]].title < folders[b.parentIds[0]].title) {
+        else if (folderA < folderB) {
             return -1;
         }
-        else if (folders[this] && folders[a.parentIds[0]].title > folders[b.parentIds[0]].title) {
+        else if (folderA > folderB) {
             return 1;
         }
         else if (a.title < b.title) {
@@ -164,13 +190,11 @@ function addFolders(task) {
     if(task.superParentIds.length > 0) {
         $.each(task.superParentIds, function() {
             if(folders[this] && !addedFolders.includes(this.toString())) {
-                console.log(addedFolders.includes(this));
                 addedFolders.push(this.toString());
                 html += "<div class='taskParent' data-id='"+folders[this].id+"'>"+folders[this].title+"</div>"
             }
         });
     }
-    console.log(addedFolders);
     html += "</div>";
     return html;
 }
@@ -184,7 +208,6 @@ function getTasks() {
         },
         success: function(data) {
             data = data.data.sort(sortItems);
-            console.log(data);
             for(task in data)   {
                 task = data[task];
                 html = "<div class='task' id='task_"+task.id+"'><div class='tags'>";
@@ -332,7 +355,8 @@ function loadTasks(timeLog, taskList, callback) {
             var timeLoggedStr = getTimeString(that.hours);
             totalHours += that.hours;
             html += "<div class='task' id='task_"+task.id+"'>";
-            html += "<div class='timeLog' data-hours='"+that.hours+"' data-log-id='"+that.id+"'>"+timeLoggedStr+"</div>";
+            html += "<div class='timeLog' data-hours='"+that.hours+"' data-log-id='"+that.id+"'>"+timeLoggedStr;
+            html += "<input type='text' value='"+that.hours+"' style='display:none;'/></div>"
             html += "<a href='"+task.permalink+"'target='_blank'>";
             html += "<h3>"+task.title+"</h3>";
             html += "</a>";
@@ -353,18 +377,24 @@ function loadTasks(timeLog, taskList, callback) {
             var thisLog = $(this);
             if(!thisLog.hasClass("editing")){
                 thisLog.addClass("editing");
-                thisLog.append("<input type='text' value='"+thisLog.attr('data-hours')+"'/>");
+                thisLog.find("input").fadeIn();
                 var editInput = thisLog.find("input");
                 editInput.focus();
-                editInput.focusout(function() {
-                    $(this).fadeOut();
-                    if($(this).val() != thisLog.attr('data-hours')) {
-                       saveTimeLog(thisLog, function(responseData) {
-                           //This will run after the ajax call is finished.
-                           updateTime(thisLog);
-                       });
+                editInput.bind("blur keyup", function(e) {
+                    if(e.type == "blur" || e.keyCode == "13") {
+                        var inputItem = $(this);
+                        inputItem.fadeOut();
+                        if($(this).val() != thisLog.attr('data-hours')) {
+                            saveTimeLog(thisLog, function(responseData) {
+                                //This will run after the ajax call is finished.
+                                updateTime(thisLog);
+                                thisLog.removeClass("editing");
+                            });
+                        }
+                        else {
+                            thisLog.removeClass("editing");
+                        }
                     }
-                    thisLog.removeClass("editing");
                 });
             }
         });
