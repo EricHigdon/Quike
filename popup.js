@@ -3,20 +3,6 @@ var wrikeAuth = new OAuth2('wrike', {
     client_secret: 'adYi2QNM0uaABf0cp24xZqx34UaH7H7TwQECy1otVLGhukrod8pnFMVEpvcLUCvz',
     api_scope: 'https://www.wrike.com/api/v3/'
 }),
-    monthNames = [
-        "Jan", 
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sept",
-        "Oct",
-        "Nov",
-        "Dec"
-    ],
     now = new Date(),
     today = now.setUTCHours(0, 0, 0, 0),
     thisWeek = {
