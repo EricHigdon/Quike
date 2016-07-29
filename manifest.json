@@ -1,6 +1,5 @@
 {
   "manifest_version": 2,
-
   "name": "Wrike Quick View",
   "description": "A Quick view of your current wrike projects, and timelogs.",
   "version": "1.7.1",
