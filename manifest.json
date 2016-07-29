@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+
+  "name": "Wrike Quick View",
+  "description": "A Quick view of your current wrike projects, and timelogs.",
+  "version": "1.7.1",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [{
+    "matches": ["https://www.wrike.com/robots.txt*"],
+    "js": ["oauth2/oauth2_inject.js"],
+    "run_at": "document_start"
+  }],
+  "web_accessible_resources": ["oauth2/oauth2.html"],
+  "permissions": [
+    "tabs",
+    "https://www.wrike.com/*",
+    "https://www.wrike.com/oauth2/token",
+    "https://www.wrike.com/api/v3/*"
+    
+  ]
+}
