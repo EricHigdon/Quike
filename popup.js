@@ -30,6 +30,7 @@ function getUser()  {
         $('#profileName').html(userInfo.name);
         getFolders();
     }
+
     if(localStorage.user == undefined || new Date(JSON.parse(localStorage.user).expires) < now)
     {
         $.ajax({ 
@@ -155,7 +156,19 @@ function sortItems(a, b) {
     else {
         folderB = folders[b.parentIds[0]].title;
     }
-
+    if(wfA == undefined)
+    {
+        wfA = {
+            'order': 0,
+            'name': 'A'
+        }
+    }
+    if(wfB == undefined) {
+        wfB = {
+            'order': 0,
+            'name': 'A'
+        }
+    }
     if (wfA.order == wfB.order) {
         if (wfA.name < wfB.name) {
             return -1;
@@ -191,7 +204,12 @@ function addFolders(task) {
         $.each(task.parentIds, function() {
             if(folders[this]) {
                 addedFolders.push(this.toString());
-                html += "<div class='taskParent' data-id='"+folders[this].id+"'>"+folders[this].title+"</div>"
+                try {
+                    html += "<div class='taskParent' data-id='"+folders[this].id+"'>"+folders[this].title+"</div>";
+                }
+                catch(e) {
+                    console.log("Folder with id "+this+" not found. ");
+                }
             }
         });
     }
@@ -199,7 +217,12 @@ function addFolders(task) {
         $.each(task.superParentIds, function() {
             if(folders[this] && !addedFolders.includes(this.toString())) {
                 addedFolders.push(this.toString());
-                html += "<div class='taskParent' data-id='"+folders[this].id+"'>"+folders[this].title+"</div>"
+                try {
+                    html += "<div class='taskParent' data-id='"+folders[this].id+"'>"+folders[this].title+"</div>";
+                }
+                catch(e) {
+                    console.log("Folder with id "+this+" not found");
+                }
             }
         });
     }
@@ -219,7 +242,13 @@ function getTasks() {
             for(task in data)   {
                 task = data[task];
                 html = "<div class='task' id='task_"+task.id+"'><div class='tags'>";
-                html += "<div data-order='"+workFlows[task.customStatusId].order+"' class='status "+workFlows[task.customStatusId].color+"'>"+workFlows[task.customStatusId].name+"</div>";
+                if (workFlows[task.customStatusId] != undefined) {
+                    html += "<div class='status ";
+                    if(workFlows[task.customStatusId].color != undefined) {
+                        html += workFlows[task.customStatusId].color;
+                    }
+                    html += "' >"+workFlows[task.customStatusId].name+"</div>";
+                }
                 //add Parent folders if they exist
                 html += addFolders(task);
                 html += "</div><a href='"+task.permalink+"'target='_blank'>";

@@ -128,6 +128,7 @@
 		    font-weight: lighter;
 		    font-size: 8pt;
 			margin: 2px;
+			background-color: #e0e0e0;
 		}
 		div#loading {
 			background: #3f5058;
