@@ -30,24 +30,32 @@ function getUser()  {
         $('#profileName').html(userInfo.name);
         getFolders();
     }
-    $.ajax({ 
-        url: "https://www.wrike.com/api/v3/contacts?me=true",
-        dataType: "json",
-        beforeSend: function (request)  {   
-            request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
-        },
-        success: function(data) {
-            data = data.data[0];
-            var userData = {
-                "wrike_id": data.id,
-                "wrike_account_id": data.profiles[0].accountId,
-                "profileImage": data.avatarUrl,
-                "name": data.firstName
-            };
-            localStorage.setItem("user", JSON.stringify(userData));
-            display_user();
-        }
-    });
+    if(localStorage.user == undefined || new Date(JSON.parse(localStorage.user).expires) < now)
+    {
+        $.ajax({ 
+            url: "https://www.wrike.com/api/v3/contacts?me=true",
+            dataType: "json",
+            beforeSend: function (request)  {   
+                request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
+            },
+            success: function(data) {
+                data = data.data[0];
+                var userData = {
+                    "wrike_id": data.id,
+                    "wrike_account_id": data.profiles[0].accountId,
+                    "profileImage": data.avatarUrl,
+                    "name": data.firstName,
+                    "expires": Date.today().add(3).days()
+                };
+                localStorage.setItem("user", JSON.stringify(userData));
+                display_user();
+            }
+        });
+    }
+    else
+    {
+        display_user();
+    }
 }
 //Get all folders in the account
 function getFolders()   {
