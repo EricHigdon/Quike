@@ -133,7 +133,13 @@ function sortItems(a, b) {
     
     if (!folders[a.parentIds[0]]) {
         if(a.superParentIds.length > 0) {
-            folderA = folders[a.superParentIds[0]].title;
+            try {
+                folderA = folders[a.superParentIds[0]].title;
+            }
+            catch(e) {
+                console.log(e, "Folder with ID "+a.superParentIds[0]+" not found.");
+                folderA = "0000AAAA-Undefined";
+            }
         }
         else {
             //Root folder goes first
@@ -146,7 +152,13 @@ function sortItems(a, b) {
 
     if (!folders[b.parentIds[0]]) {
         if(b.superParentIds.length > 0) {
-            folderB = folders[b.superParentIds[0]].title;
+            try {
+                folderB = folders[b.superParentIds[0]].title;
+            }
+            catch(e) {
+                console.log(e, "Folder with ID "+a.superParentIds[0]+" not found.");
+                folderB = "0000AAAA-Undefined";
+            }
         }
         else {
             //Root folder goes first
