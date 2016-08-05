@@ -277,7 +277,7 @@ function getTasks() {
 //Get Time Log
 function getHours() {
     $.ajax({
-        url: 'https://www.wrike.com/api/v3/accounts/'+userInfo.wrike_account_id+'/timelogs?me=true&', 
+        url: 'https://www.wrike.com/api/v3/accounts/'+userInfo.wrike_account_id+'/timelogs?me=true', 
         dataType: "json",
         beforeSend: function(request)   {
             request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
