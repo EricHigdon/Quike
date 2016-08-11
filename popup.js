@@ -1,8 +1,9 @@
 var wrikeAuth = new OAuth2('wrike', {
-    client_id: 'ES2cf7Mz',
-    client_secret: 'adYi2QNM0uaABf0cp24xZqx34UaH7H7TwQECy1otVLGhukrod8pnFMVEpvcLUCvz',
-    api_scope: 'https://www.wrike.com/api/v3/'
-}),
+        client_id: 'ES2cf7Mz',
+        client_secret: 'adYi2QNM0uaABf0cp24xZqx34UaH7H7TwQECy1otVLGhukrod8pnFMVEpvcLUCvz',
+        api_scope: 'https://www.wrike.com/api/v3/'
+    }),
+    expired = false,
     now = new Date(),
     today = now.setUTCHours(0, 0, 0, 0),
     thisWeek = {
@@ -31,7 +32,7 @@ function getUser()  {
         getFolders();
     }
 
-    if(localStorage.user == undefined || new Date(JSON.parse(localStorage.user).expires) < now)
+    if(localStorage.user == undefined || expired)
     {
         $.ajax({ 
             url: "https://www.wrike.com/api/v3/contacts?me=true",
@@ -46,7 +47,6 @@ function getUser()  {
                     "wrike_account_id": data.profiles[0].accountId,
                     "profileImage": data.avatarUrl,
                     "name": data.firstName,
-                    "expires": Date.today().add(3).days()
                 };
                 localStorage.setItem("user", JSON.stringify(userData));
                 display_user();
@@ -60,43 +60,83 @@ function getUser()  {
 }
 //Get all folders in the account
 function getFolders()   {
-    $.ajax({ 
-        url: "https://www.wrike.com/api/v3/accounts/"+userInfo.wrike_account_id+"/folders",
-        dataType: "json",
-        beforeSend: function(request)   {
-            request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
-        },
-        success: function(data) {
-            $.each(data.data, function() {
-                if(this.title != "Root") {
-                    folders[this.id] = this;
-                };
-            });
-            getWorkFlows();
-        }
-    });
+    function load_folders() {
+        folders = JSON.parse(localStorage.folders);
+        getWorkFlows();
+    }
+    if(localStorage.folders == undefined || expired)
+    {
+        $.ajax({ 
+            url: "https://www.wrike.com/api/v3/accounts/"+userInfo.wrike_account_id+"/folders",
+            dataType: "json",
+            beforeSend: function(request)   {
+                request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
+            },
+            success: function(data) {
+                $.each(data.data, function() {
+                    if(this.title != "Root") {
+                        folders[this.id] = this;
+                    };
+                });
+                localStorage.setItem("folders", JSON.stringify(folders));
+                load_folders();
+            }
+        });
+    }
+    else
+    {
+        load_folders();
+    }
 }
 //Get Workflows
 function getWorkFlows() {
-    $.ajax({
-        url: "https://www.wrike.com/api/v3/accounts/"+userInfo.wrike_account_id+"/workflows",
-        dataType: "json",
-        beforeSend: function(request)   {
-            request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
-        },
-        success: function(data) {
-            $.each(data.data, function() {
-                $.each(this.customStatuses, function(index) {
-                    this.order = index;
-                    workFlows[this.id] = this;
+    function load_workflows() {
+        workFlows = JSON.parse(localStorage.worflows);
+        getColors();
+    }
+    if(localStorage.workflows == undefined || expired)
+    {
+        $.ajax({
+            url: "https://www.wrike.com/api/v3/accounts/"+userInfo.wrike_account_id+"/workflows",
+            dataType: "json",
+            beforeSend: function(request)   {
+                request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
+            },
+            success: function(data) {
+                $.each(data.data, function() {
+                    $.each(this.customStatuses, function(index) {
+                        this.order = index;
+                        workFlows[this.id] = this;
+                    });
                 });
-            });
-            getColors();
-        }
-    });
+                localStorage.setItem("worflows", JSON.stringify(workFlows));
+                load_workflows();
+            }
+        });
+    }
+    else
+    {
+        load_workflows();
+    }
 }
 //Get Colors
 function getColors() {
+    function load_colors() {
+        colors = JSON.parse(localStorage.colors);
+        var styles = "<style>"
+        $.each(colors, function () {
+            var RGBColor = hexToRgb(this.hex),
+                convertedColor = [];
+            $.each(RGBColor, function (index) {
+                convertedColor[index] = Math.round((255+this)/2);
+            });
+            styles += "."+this.name+"{ background-color: rgb("+convertedColor.join()+"); } ";
+        });
+        styles += "</style>";
+        $("head").append(styles);
+getTasks();
+    }
+
     function hexToRgb(hex) {
         var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? [ 
@@ -105,27 +145,24 @@ function getColors() {
             parseInt(result[3], 16)
         ] : null;
     }
-    $.ajax({
-        url: "https://www.wrike.com/api/v3/colors",
-        dataType: "json",
-        beforeSend: function(request)   {
-            request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
-        },
-        success: function(data) {
-            var styles = "<style>"
-            $.each(data.data, function () {
-                var RGBColor = hexToRgb(this.hex),
-                    convertedColor = [];
-                $.each(RGBColor, function (index) {
-                    convertedColor[index] = Math.round((255+this)/2);
-                });
-                styles += "."+this.name+"{ background-color: rgb("+convertedColor.join()+"); } ";
-            });
-            styles += "</style>";
-            $("head").append(styles);
-            getTasks();
-        }
-    });
+    if(localStorage.colors == undefined || expired)
+    {
+        $.ajax({
+            url: "https://www.wrike.com/api/v3/colors",
+            dataType: "json",
+            beforeSend: function(request)   {
+                request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
+            },
+            success: function(data) {
+                localStorage.setItem("colors", JSON.stringify(data.data))
+                load_colors();
+            }
+        });
+    }
+    else
+    {
+        load_colors();
+    }
 }
 function sortItems(a, b) {
     var wfA = workFlows[a.customStatusId],
@@ -489,6 +526,12 @@ function showWeekPage() {
 
 wrikeAuth.authorize(function() {
       // Ready for action
+    if(localStorage.cache_expires == undefined || new Date(JSON.parse(localStorage.cache_expires)) < now)
+    {
+        expired = true;
+        localStorage.setItem("cache_expires", JSON.stringify(Date.today().add(3).days()))
+        console.log("Rebuilding cache");
+    }
     getUser();
     $('nav ul.nav li').click(function() {
         $("nav ul.nav li.active").removeClass("active");
