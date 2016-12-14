@@ -1,6 +1,6 @@
 var wrikeAuth = new OAuth2('wrike', {
-        client_id: 'ES2cf7Mz',
-        client_secret: 'adYi2QNM0uaABf0cp24xZqx34UaH7H7TwQECy1otVLGhukrod8pnFMVEpvcLUCvz',
+        client_id: 'rR5rgzLS',
+        client_secret: 'NVZJnlIEIZrCtZge3fdnR3aHZ7umzqBTV2psfjvBG42skw4Axivezs0hy2mpxFuk',
         api_scope: 'https://www.wrike.com/api/v3/'
     }),
     expired = false,
@@ -34,10 +34,10 @@ function getUser()  {
 
     if(localStorage.user == undefined || expired)
     {
-        $.ajax({ 
+        $.ajax({
             url: "https://www.wrike.com/api/v3/contacts?me=true",
             dataType: "json",
-            beforeSend: function (request)  {   
+            beforeSend: function (request)  {
                 request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
             },
             success: function(data) {
@@ -66,7 +66,7 @@ function getFolders()   {
     }
     if(localStorage.folders == undefined || expired)
     {
-        $.ajax({ 
+        $.ajax({
             url: "https://www.wrike.com/api/v3/accounts/"+userInfo.wrike_account_id+"/folders",
             dataType: "json",
             beforeSend: function(request)   {
@@ -139,7 +139,7 @@ getTasks();
 
     function hexToRgb(hex) {
         var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? [ 
+        return result ? [
             parseInt(result[1], 16),
             parseInt(result[2], 16),
             parseInt(result[3], 16)
@@ -167,7 +167,7 @@ getTasks();
 function sortItems(a, b) {
     var wfA = workFlows[a.customStatusId],
         wfB = workFlows[b.customStatusId];
-    
+
     if (!folders[a.parentIds[0]]) {
         if(a.superParentIds.length > 0) {
             try {
@@ -314,7 +314,7 @@ function getTasks() {
 //Get Time Log
 function getHours() {
     $.ajax({
-        url: 'https://www.wrike.com/api/v3/accounts/'+userInfo.wrike_account_id+'/timelogs?me=true', 
+        url: 'https://www.wrike.com/api/v3/accounts/'+userInfo.wrike_account_id+'/timelogs?me=true',
         dataType: "json",
         beforeSend: function(request)   {
             request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
@@ -384,7 +384,7 @@ function saveTimeLog(logElement, callback) {
             'timeLog':logElement.attr("data-log-id"),
             'hours':logElement.find("input").val(),
             'trackedDate':trackedDate,
-            'comment': logElement.parent().find(".taskDesc").html() 
+            'comment': logElement.parent().find(".taskDesc").html()
         },
         type: 'POST',
         success: function(data) {
@@ -397,11 +397,11 @@ function saveTimeLog(logElement, callback) {
 }
 
 function getTimeString(hours) {
-    
+
     var timeLogged = (new Date).clearTime().addHours(hours),
         minutesLogged = Math.round(timeLogged.getMinutes() + (timeLogged.getSeconds() / 60)),
         hoursLogged = timeLogged.getHours();
-           
+
     if(hours >= 24) {
         var daysLogged = Math.floor(hours / 24);
         hoursLogged += daysLogged * 24;

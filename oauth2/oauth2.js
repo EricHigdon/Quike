@@ -130,6 +130,11 @@ OAuth2.prototype.getAccessAndRefreshTokens = function(authorizationCode, callbac
         // Callback with the data (incl. tokens).
         callback(that.adapter.parseAccessToken(xhr.responseText));
       }
+      else if (xhr.status == 400) {
+        // Callback with the data (incl. tokens).
+        localStorage.clear();
+        window.close();
+      }
     }
   });
 
