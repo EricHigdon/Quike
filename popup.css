@@ -103,7 +103,7 @@
 		ul.nav li {
 			display: inline-block;
 			padding: 7px 5px;
-			font-size:8pt;
+			font-size:.8em;
 		}
 		ul.nav li.active {
 			background: #5285b8;
