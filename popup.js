@@ -42,6 +42,7 @@ function getUser()  {
             },
             success: function(data) {
                 data = data.data[0];
+				console.log(data);
                 var userData = {
                     "wrike_id": data.id,
                     "wrike_account_id": data.profiles[0].accountId,
@@ -64,7 +65,7 @@ function getFolders()   {
         folders = JSON.parse(localStorage.folders);
         getWorkFlows();
     }
-    if(localStorage.folders == undefined || expired)
+    if(localStorage.folders == undefined || expired || localStorage.root_foleder_id == undefined)
     {
         $.ajax({
             url: "https://www.wrike.com/api/v3/accounts/"+userInfo.wrike_account_id+"/folders",
@@ -74,9 +75,10 @@ function getFolders()   {
             },
             success: function(data) {
                 $.each(data.data, function() {
-                    if(this.title != "Root") {
+                    if(this.title != "Root")
                         folders[this.id] = this;
-                    };
+					else
+						localStorage.setItem('root_folder_id', this.id)
                 });
                 localStorage.setItem("folders", JSON.stringify(folders));
                 load_folders();
@@ -134,7 +136,7 @@ function getColors() {
         });
         styles += "</style>";
         $("head").append(styles);
-getTasks();
+		getTasks();
     }
 
     function hexToRgb(hex) {
@@ -303,7 +305,9 @@ function getTasks() {
                 html += "</div><a href='"+task.permalink+"'target='_blank'>";
                 html +="<div class='timeLog'></div><h3>"+task.title+"</h3>";
                 html += "</a>";
-                html += "</div>";
+                html += "</div><div class='footer'>";
+				html += "<a id='add' class='addTask'><span class='plus'>+</span> New task</a>";
+				html += "</div>";
                 $("#tasks").append(html);
             }
             var popup = "<div class='statusPopup'><li>Ready For Testing</li><li>Active</li></div>";
@@ -371,7 +375,6 @@ function getFoldersById(folders, callback) {
     $.each(folders, function() {
         folderIds += this+",";
     });
-    //AJAX call to folders API
 }
 
 function saveTimeLog(logElement, callback) {
@@ -394,6 +397,39 @@ function saveTimeLog(logElement, callback) {
             console.log(e);
         }
     });
+}
+
+function createTask(taskData) {
+	console.log(taskData);
+	$.ajax({
+		url: 'https://www.wrike.com/api/v3/folders/'+localStorage.root_folder_id+'/tasks',
+		dataType: 'json',
+		type: 'POST',
+		data: taskData,
+		beforeSend: function(request) {
+			request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
+		},
+		success: function(data) {
+			var url = data.data[0].permalink;
+			chrome.tabs.query({'url': 'https://www.wrike.com/*'}, function(tabs) {
+				if(tabs.length)
+					var tabId = tabs[0].id
+				else
+					var tabId = 0
+				if(tabId)
+					chrome.tabs.update(tabId, {'url': url});
+				else
+					chrome.tabs.create({'url': url});
+			});
+		}
+	});
+}
+function addTask() {
+	chrome.tabs.getSelected(null, function(tab) {
+		chrome.tabs.sendMessage(tab.id, {text: 'getWrikeMeta'}, function(response) {
+			createTask(response);
+		});
+	});
 }
 
 function getTimeString(hours) {
@@ -453,11 +489,14 @@ function loadTasks(timeLog, taskList, callback) {
             //add Parent folders if they exist
             html += addFolders(task);
             html += "</div>";
-            //$("#day").append(html);
         });
         var totalHoursStr = getTimeString(totalHours);
-        //$("#day").append(
-        html += "<div class='totalHours'><strong>Total Time:</strong> <span class='totalHoursSpan'>"+totalHoursStr+"</span></div>";
+        html += "<div class='footer'>";
+		html += "<a id='add' class='addTask'><span class='plus'>+</span> New task</a>";
+		html += "<p class='totalHours'><strong>Total Time: </strong>";
+		html += "<span class='totalHoursSpan'>"+totalHoursStr+"</span>";
+		html += "</p>";
+		html += "</div>";
         callback(html);
         $(".page .timeLog").click(function() {
             var thisLog = $(this);
@@ -499,7 +538,6 @@ function loadTimeData() {
             $("#week").append(html);
         });
     });
-
 }
 
 function showTasksPage() {
@@ -545,6 +583,7 @@ wrikeAuth.authorize(function() {
                 break;
             case "#week":
                 showWeekPage();
+				break;
         }
     });
     $( document ).ajaxComplete(function() {
@@ -553,4 +592,7 @@ wrikeAuth.authorize(function() {
         else
             showDayPage();
     });
+	$('body').on('click', '#add', function() {
+		addTask();
+	});
 });

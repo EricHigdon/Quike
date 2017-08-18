@@ -81,14 +81,17 @@
 		.page#tasks, .page#loading {
 			margin-bottom: 0px;
 		}
-		.totalHours {
-		    text-align: right;
+		.footer {
 		    padding: 10px;
 		    background: #eee;
 		    position: absolute;
 			bottom: 0;
 			left: 0;
 			right: 0;
+		}
+		.totalHours {
+			margin: 0;
+			float: right;
 		}
 		nav {
 			text-align: center;
@@ -148,6 +151,17 @@
 			float: right;
 			text-align: right;
 			max-width: 60%;
+		}
+		.addTask {
+			color: #5285b8;
+			cursor: pointer;
+		}
+		.plus {
+			font-size: 16pt;
+			line-height: 6pt;
+			font-weight: bold;
+			vertical-align: top;
+			padding-right: 3px;
 		}
 		#loading svg {
 			margin-top: 30px;
