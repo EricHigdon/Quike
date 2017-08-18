@@ -417,7 +417,7 @@ function createTask(taskData) {
 				else
 					var tabId = 0
 				if(tabId)
-					chrome.tabs.update(tabId, {'url': url});
+					chrome.tabs.update(tabId, {'url': url, 'active': true});
 				else
 					chrome.tabs.create({'url': url});
 			});

@@ -6,9 +6,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 		// the web-page's DOM content as argument
 		var response = {};
 		document.querySelectorAll('meta[name^="wrike_"]').forEach(function(tag){
-			var content = tag.getAttribute('content');
-			response[tag.getAttribute('name').split('_')[1]] = content;
+			var content = tag.getAttribute('content')
+				tagName = tag.getAttribute('name').split('_')[1];
+			response[tagName] = content;
 		});
+		if(response.title == undefined)
+			response.title = document.title;
 		sendResponse(response);
 	}
 });
