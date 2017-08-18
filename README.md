@@ -6,7 +6,5 @@ Creating new tasks with Quike is simple: simply click the "New task" button at t
 
 ### Adding task meta data to your webpage
 Add meta tags with the prefix "wrike_" to send this data to the task. For example: to se the task title add
-{::nomarkdown}
-<meta name='wrike_title' content='My Task title'>
-{:/}
+```<meta name='wrike_title' content='My Task title'>```
 You can add any of the values that the task may have by prefixing the attribute name with "wrike_" see https://developers.wrike.com/documentation/api/methods/create-task for a full list of available parameters.
