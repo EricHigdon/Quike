@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 				tagName = tag.getAttribute('name').split('_')[1];
 			response[tagName] = content;
 		});
-		if(response.title == undefined)
+		if(!response.title)
 			response.title = document.title;
 		sendResponse(response);
 	}
