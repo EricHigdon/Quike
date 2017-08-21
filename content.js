@@ -8,6 +8,11 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 		document.querySelectorAll('meta[name^="wrike_"]').forEach(function(tag){
 			var content = tag.getAttribute('content')
 				tagName = tag.getAttribute('name').split('_')[1];
+			content = content.replace(/<escape>(.|\s)*?<\/escape>/g, function(wrap) {
+				return wrap.replace('<escape>', '').replace('</escape>', '').replace(/[<&>'"]/g, function(c) {
+					return "&#" + c.charCodeAt() + ";";
+				});
+			});
 			response[tagName] = content;
 		});
 		if(!response.title)

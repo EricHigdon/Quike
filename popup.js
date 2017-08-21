@@ -416,6 +416,22 @@ function createTask(taskData) {
 					var tabId = tabs[0].id
 				else
 					var tabId = 0
+				//if(taskData.decription == undefined) {
+				//	chrome.tabs.captureVisibleTab(null, {}, function (image) {
+				//		console.log('image:', image);
+				//		$.ajax({
+				//			url: 'https://www.wrike.com/api/v3/tasks/'+data.data[0].id+'/attachments/',
+				//			type: 'POST',
+				//			data: {'url': image},
+				//			beforeSend: function(request) {
+				//				request.setRequestHeader("Authorization", "bearer "+wrikeAuth.getAccessToken());
+				//			},
+				//			success: function(response){
+				//				console.log(response);
+				//			}
+				//		});
+				//	});
+				//}
 				if(tabId)
 					chrome.tabs.update(tabId, {'url': url, 'active': true});
 				else
