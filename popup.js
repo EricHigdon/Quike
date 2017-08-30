@@ -453,7 +453,11 @@ function getTimeString(hours) {
     var timeLogged = (new Date).clearTime().addHours(hours),
         minutesLogged = Math.round(timeLogged.getMinutes() + (timeLogged.getSeconds() / 60)),
         hoursLogged = timeLogged.getHours();
-
+	
+	if(minutesLogged == 60) {
+		minutesLogged = 0;
+		hoursLogged += 1;
+	}
     if(hours >= 24) {
         var daysLogged = Math.floor(hours / 24);
         hoursLogged += daysLogged * 24;
