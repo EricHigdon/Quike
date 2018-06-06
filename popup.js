@@ -7,8 +7,8 @@ var wrikeAuth = new OAuth2('wrike', {
     now = new Date(),
     today = now.setUTCHours(0, 0, 0, 0),
     thisWeek = {
-        "start": new Date (Date.parse('last monday').setUTCHours(0, 0, 0, 0)),
-        "end": new Date(Date.parse('friday').setUTCHours(0, 0, 0, 0)),
+        "start": new Date (Date.parse('last sunday').setUTCHours(0, 0, 0, 0)),
+        "end": new Date(Date.parse('saturday').setUTCHours(0, 0, 0, 0)),
         "real_end": new Date(Date.parse('saturday'))
     },
     staticDate = new Date(),
@@ -19,8 +19,8 @@ var wrikeAuth = new OAuth2('wrike', {
     workFlows = {},
     colors = {};
 
-//Check if today is Monday
-if(Date.today().toString("ddd") == "Mon") {
+//Check if today is Sunday
+if(Date.today().toString("ddd") == "Sun") {
     thisWeek.start = new Date(Date.today().setUTCHours(0, 0, 0, 0));
 }
 //Get the user profile

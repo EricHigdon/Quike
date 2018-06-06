@@ -39,6 +39,7 @@
 		.task h3 {
 		    margin: 0px;
 			display: inline;
+			overflow-wrap: break-word;
 		}
 		.taskRange	{
 			display: none;
