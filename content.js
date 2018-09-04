@@ -9,8 +9,13 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 			var content = tag.getAttribute('content')
 				tagName = tag.getAttribute('name').split('_')[1];
 			content = content.replace(/<escape>(.|\s)*?<\/escape>/g, function(wrap) {
-				return wrap.replace('<escape>', '').replace('</escape>', '').replace(/[<&>'"]/g, function(c) {
-					return "&#" + c.charCodeAt() + ";";
+				return wrap.replace('<escape>', '').replace('</escape>', '').replace(/[<&>'"\r\n\t]/g, function(c) {
+					if(c == "\r" || c == "\n"){
+						return "<br>";
+					}
+					else {
+						return "&#" + c.charCodeAt() + ";";
+					}
 				});
 			});
 			response[tagName] = content;
